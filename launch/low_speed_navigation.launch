@@ -1,0 +1,27 @@
+<launch> 
+  <!-- 占据栅格图发布 -->
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find low_speed_navigation_planning)/yaml/low_speed_cost_map.yaml" />
+
+  <!-- cost map generation -->
+  <node pkg="costmap_generation" name="costmap_generation_node" type="costmap_generation_node" output="screen">
+      <param name="static_map_topic" value="/map"/>
+      <param name="costmap_pub_topic" value="/costmap_generation/costmap_2d"/>
+      <rosparam file="$(find costmap_generation)/yaml/sensor.yaml" command="load" />
+  </node>
+
+  <!-- low speed navigation planning-->
+  <node pkg="low_speed_navigation_planning" type="low_speed_navigation_planning_node" name="low_speed_navigation_planning" output="screen">
+      <!-- navigation mode, 1 means structure guide, 2 means hybrid astar, 3 means astar, 4 means theta structure guide-->
+      <param name="navigation_mode" value="1"/>
+      <!-- subscribe grip map -->
+      <param name="occupancy_grid_topic" value="/costmap_generation/costmap_2d"/>
+      <param name="visualization_global_reference_topic" value="/low_speed_navigation/global_navigation_line"/>
+      <param name="guided_path_topic" value="/low_speed_navigation/guided_path"/>
+      <param name="odometry_topic" value="/planning_input/localization"/>
+      <param name="movement_topic" value="/planning_input/velocity"/>
+      <param name="curvature_topic" value="/planning_input/curvature"/>
+      <param name="obstacle_topic" value="/perception/objects"/>
+      <param name="map_service" value="/get_guided_curves"/>
+      <param name="obstacle_trajectory_prediction_service" value="/get_predicted_trajectory"/>
+  </node>
+</launch>
